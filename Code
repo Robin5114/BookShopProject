@@ -1,0 +1,641 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Book Shop Management System</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* Custom styles */
+        .gradient-bg {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+        .book-card {
+            transition: all 0.3s ease;
+        }
+        .book-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+        }
+        .modal {
+            transition: opacity 0.3s ease, visibility 0.3s ease;
+        }
+    </style>
+</head>
+<body class="bg-gray-100">
+    <!-- Navigation -->
+    <nav class="gradient-bg text-white shadow-lg">
+        <div class="container mx-auto px-6 py-3">
+            <div class="flex justify-between items-center">
+                <div class="text-2xl font-bold">BookVerse</div>
+                <div class="flex space-x-4" id="navLinks">
+                    <button class="px-3 py-2 rounded hover:bg-purple-700" onclick="showGeneralSection()">General</button>
+                    <button class="px-3 py-2 rounded hover:bg-purple-700" onclick="showUserSection()">User</button>
+                    <button class="px-3 py-2 rounded hover:bg-purple-700" id="loginBtn" onclick="showLoginModal()">Login</button>
+                    <button class="px-3 py-2 rounded bg-white text-purple-800 font-bold hidden" id="logoutBtn" onclick="logout()">Logout</button>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <div class="container mx-auto px-4 py-8">
+        <!-- General Users Section -->
+        <div id="generalSection">
+            <h1 class="text-3xl font-bold mb-6">Book Shop Management</h1>
+            
+            <!-- Task 1: Get all books -->
+            <div class="bg-white p-6 rounded-lg shadow mb-6">
+                <h2 class="text-xl font-semibold mb-4">Task 1: Get All Books</h2>
+                <button onclick="getAllBooks()" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
+                    Get Book List
+                </button>
+                <div id="bookList" class="mt-4 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"></div>
+            </div>
+
+            <!-- Task 2: Search by ISBN -->
+            <div class="bg-white p-6 rounded-lg shadow mb-6">
+                <h2 class="text-xl font-semibold mb-4">Task 2: Search by ISBN</h2>
+                <div class="flex">
+                    <input type="text" id="isbnSearch" placeholder="Enter ISBN" class="border rounded-l px-4 py-2 w-full">
+                    <button onclick="searchByISBN()" class="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded-r">
+                        Search
+                    </button>
+                </div>
+                <div id="isbnResult" class="mt-4"></div>
+            </div>
+
+            <!-- Task 3: Search by Author -->
+            <div class="bg-white p-6 rounded-lg shadow mb-6">
+                <h2 class="text-xl font-semibold mb-4">Task 3: Search by Author</h2>
+                <div class="flex">
+                    <input type="text" id="authorSearch" placeholder="Enter Author" class="border rounded-l px-4 py-2 w-full">
+                    <button onclick="searchByAuthor()" class="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded-r">
+                        Search
+                    </button>
+                </div>
+                <div id="authorResult" class="mt-4 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"></div>
+            </div>
+
+            <!-- Task 4: Search by Title -->
+            <div class="bg-white p-6 rounded-lg shadow mb-6">
+                <h2 class="text-xl font-semibold mb-4">Task 4: Search by Title</h2>
+                <div class="flex">
+                    <input type="text" id="titleSearch" placeholder="Enter Title" class="border rounded-l px-4 py-2 w-full">
+                    <button onclick="searchByTitle()" class="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded-r">
+                        Search
+                    </button>
+                </div>
+                <div id="titleResult" class="mt-4 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"></div>
+            </div>
+
+            <!-- Task 5: Get Book Reviews -->
+            <div class="bg-white p-6 rounded-lg shadow mb-6">
+                <h2 class="text-xl font-semibold mb-4">Task 5: Get Book Reviews</h2>
+                <div class="flex">
+                    <input type="text" id="reviewBookId" placeholder="Enter Book ID" class="border rounded-l px-4 py-2 w-full">
+                    <button onclick="getBookReviews()" class="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded-r">
+                        Get Reviews
+                    </button>
+                </div>
+                <div id="bookReviews" class="mt-4"></div>
+            </div>
+        </div>
+
+        <!-- Registered Users Section (Initially hidden) -->
+        <div id="userSection" class="hidden">
+            <h1 class="text-3xl font-bold mb-6">User Dashboard</h1>
+            
+            <!-- Task 6: Register New User -->
+            <div class="bg-white p-6 rounded-lg shadow mb-6">
+                <h2 class="text-xl font-semibold mb-4">Task 6: Register New User</h2>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <input type="text" id="regUsername" placeholder="Username" class="border rounded px-3 py-2">
+                    <input type="password" id="regPassword" placeholder="Password" class="border rounded px-3 py-2">
+                    <input type="email" id="regEmail" placeholder="Email" class="border rounded px-3 py-2">
+                    <button onclick="registerUser()" class="bg-purple-500 hover:bg-purple-700 text-white font-bold py-2 px-4 rounded">
+                        Register
+                    </button>
+                </div>
+                <div id="registrationStatus" class="mt-3"></div>
+            </div>
+
+            <!-- Task 8: Add/Modify Review -->
+            <div class="bg-white p-6 rounded-lg shadow mb-6">
+                <h2 class="text-xl font-semibold mb-4">Task 8: Add/Modify Review</h2>
+                <div class="grid gap-4">
+                    <input type="text" id="reviewBookIdUser" placeholder="Book ID" class="border rounded px-3 py-2">
+                    <textarea id="reviewContent" placeholder="Your review" class="border rounded px-3 py-2 h-24"></textarea>
+                    <select id="reviewRating" class="border rounded px-3 py-2">
+                        <option value="1">★</option>
+                        <option value="2">★★</option>
+                        <option value="3">★★★</option>
+                        <option value="4">★★★★</option>
+                        <option selected value="5">★★★★★</option>
+                    </select>
+                    <button onclick="submitReview()" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
+                        Submit Review
+                    </button>
+                </div>
+                <div id="reviewStatus" class="mt-3"></div>
+            </div>
+
+            <!-- Task 9: Delete Review -->
+            <div class="bg-white p-6 rounded-lg shadow mb-6">
+                <h2 class="text-xl font-semibold mb-4">Task 9: Delete Review</h2>
+                <div class="flex">
+                    <input type="text" id="deleteReviewId" placeholder="Review ID" class="border rounded-l px-4 py-2 w-full">
+                    <button onclick="deleteReview()" class="bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded-r">
+                        Delete
+                    </button>
+                </div>
+                <div id="deleteStatus" class="mt-3"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Login Modal -->
+    <div id="loginModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 modal opacity-0 invisible">
+        <div class="bg-white p-6 rounded-lg shadow-lg max-w-md w-full">
+            <h2 class="text-2xl font-bold mb-4">Login</h2>
+            <div class="space-y-4">
+                <input type="text" id="loginUsername" placeholder="Username" class="border rounded w-full px-3 py-2">
+                <input type="password" id="loginPassword" placeholder="Password" class="border rounded w-full px-3 py-2">
+                <div class="flex justify-end space-x-3">
+                    <button onclick="hideLoginModal()" class="px-4 py-2 bg-gray-300 rounded hover:bg-gray-400">Cancel</button>
+                    <button onclick="loginUser()" class="px-4 py-2 bg-purple-600 text-white rounded hover:bg-purple-700">Login</button>
+                </div>
+            </div>
+            <div id="loginStatus" class="mt-3 text-red-500"></div>
+        </div>
+    </div>
+
+    <script>
+        // Mock database
+        const mockDatabase = {
+            books: [
+                {
+                    id: 1,
+                    isbn: "978-3-16-148410-0",
+                    title: "The Great Gatsby",
+                    author: "F. Scott Fitzgerald",
+                    year: 1925,
+                    publisher: "Scribner",
+                    genre: "Classic",
+                    image: "https://storage.googleapis.com/workspace-0f70711f-8b4e-4d94-86f1-2a93ccde5887/image/e3f82746-2365-4771-a082-68b4c4f9d4b7.png",
+                    description: "A story of wealth, love, and the American Dream in the 1920s."
+                },
+                {
+                    id: 2,
+                    isbn: "978-0-06-112008-4",
+                    title: "To Kill a Mockingbird",
+                    author: "Harper Lee",
+                    year: 1960,
+                    publisher: "J. B. Lippincott & Co.",
+                    genre: "Southern Gothic",
+                    image: "https://storage.googleapis.com/workspace-0f70711f-8b4e-4d94-86f1-2a93ccde5887/image/48296358-c0e8-4735-92ca-8f42be9b1201.png",
+                    description: "A powerful story of racial injustice and moral growth in the American South."
+                },
+                {
+                    id: 3,
+                    isbn: "978-0-452-28423-4",
+                    title: "1984",
+                    author: "George Orwell",
+                    year: 1949,
+                    publisher: "Secker & Warburg",
+                    genre: "Dystopian",
+                    image: "https://storage.googleapis.com/workspace-0f70711f-8b4e-4d94-86f1-2a93ccde5887/image/83dc94d8-54b2-4b3c-b1f5-93b11fe4ad34.png",
+                    description: "A dystopian novel about totalitarianism and government surveillance."
+                },
+                {
+                    id: 4,
+                    isbn: "978-0-7475-3269-9",
+                    title: "Harry Potter and the Philosopher's Stone",
+                    author: "J.K. Rowling",
+                    year: 1997,
+                    publisher: "Bloomsbury",
+                    genre: "Fantasy",
+                    image: "https://storage.googleapis.com/workspace-0f70711f-8b4e-4d94-86f1-2a93ccde5887/image/0322d0c6-8798-429e-bbe6-7c9e779172eb.png",
+                    description: "The first book in the Harry Potter series about a young wizard."
+                }
+            ],
+            users: [],
+            reviews: []
+        };
+
+        // Current user session
+        let currentUser = null;
+
+        // DOM Elements
+        const generalSection = document.getElementById('generalSection');
+        const userSection = document.getElementById('userSection');
+        const loginBtn = document.getElementById('loginBtn');
+        const logoutBtn = document.getElementById('logoutBtn');
+        const loginModal = document.getElementById('loginModal');
+
+        // Show/hide sections
+        function showGeneralSection() {
+            generalSection.classList.remove('hidden');
+            userSection.classList.add('hidden');
+        }
+
+        function showUserSection() {
+            if (!currentUser) {
+                alert('Please login first');
+                showLoginModal();
+                return;
+            }
+            userSection.classList.remove('hidden');
+            generalSection.classList.add('hidden');
+        }
+
+        // Modal functions
+        function showLoginModal() {
+            loginModal.classList.remove('opacity-0', 'invisible');
+            loginModal.classList.add('opacity-100', 'visible');
+        }
+
+        function hideLoginModal() {
+            loginModal.classList.remove('opacity-100', 'visible');
+            loginModal.classList.add('opacity-0', 'invisible');
+            document.getElementById('loginStatus').textContent = '';
+        }
+
+        // User functions
+        function loginUser() {
+            const username = document.getElementById('loginUsername').value;
+            const password = document.getElementById('loginPassword').value;
+            
+            if (!username || !password) {
+                document.getElementById('loginStatus').textContent = 'Please fill in all fields';
+                return;
+            }
+            
+            const user = mockDatabase.users.find(u => u.username === username && u.password === password);
+            
+            if (user) {
+                currentUser = user;
+                loginBtn.classList.add('hidden');
+                logoutBtn.classList.remove('hidden');
+                hideLoginModal();
+                alert(`Login successful! Welcome ${username}`);
+            showUserSection();
+            // Update user section heading
+            document.querySelector('#userSection h1').textContent = `${username}'s Dashboard`;
+            } else {
+                document.getElementById('loginStatus').textContent = 'Invalid username or password';
+            }
+        }
+
+        function logout() {
+            currentUser = null;
+            loginBtn.classList.remove('hidden');
+            logoutBtn.classList.add('hidden');
+            showGeneralSection();
+        }
+
+        function registerUser() {
+            const username = document.getElementById('regUsername').value;
+            const password = document.getElementById('regPassword').value;
+            const email = document.getElementById('regEmail').value;
+            
+            if (!username || !password || !email) {
+                document.getElementById('registrationStatus').textContent = 'Please fill in all fields';
+                document.getElementById('registrationStatus').className = 'text-red-500 mt-3';
+                return;
+            }
+            
+            if (mockDatabase.users.some(u => u.username === username)) {
+                document.getElementById('registrationStatus').textContent = 'Username already exists';
+                document.getElementById('registrationStatus').className = 'text-red-500 mt-3';
+                return;
+            }
+            
+            mockDatabase.users.push({
+                id: mockDatabase.users.length + 1,
+                username,
+                password,
+                email,
+                dateJoined: new Date().toISOString()
+            });
+            
+            document.getElementById('registrationStatus').textContent = 'Registration successful! Please login.';
+            document.getElementById('registrationStatus').className = 'text-green-500 mt-3';
+            
+            // Auto-fill login form
+            document.getElementById('loginUsername').value = username;
+            document.getElementById('loginPassword').value = password;
+            
+            // Clear form
+            document.getElementById('regUsername').value = '';
+            document.getElementById('regPassword').value = '';
+            document.getElementById('regEmail').value = '';
+        }
+
+        // Book functions
+        function getAllBooks() {
+            const bookListContainer = document.getElementById('bookList');
+            bookListContainer.innerHTML = '';
+            
+            mockDatabase.books.forEach(book => {
+                const bookCard = createBookCard(book);
+                bookListContainer.appendChild(bookCard);
+            });
+        }
+
+        function searchByISBN() {
+            const isbn = document.getElementById('isbnSearch').value;
+            const resultContainer = document.getElementById('isbnResult');
+            
+            if (!isbn) {
+                resultContainer.innerHTML = '<p class="text-red-500">Please enter an ISBN</p>';
+                return;
+            }
+            
+            const book = mockDatabase.books.find(b => b.isbn === isbn);
+            
+            if (book) {
+                resultContainer.innerHTML = '';
+                const bookCard = createBookCard(book);
+                resultContainer.appendChild(bookCard);
+            } else {
+                resultContainer.innerHTML = `<p class="text-red-500">No book found with ISBN: ${isbn}</p>`;
+            }
+        }
+
+        function searchByAuthor() {
+            const author = document.getElementById('authorSearch').value.toLowerCase();
+            const resultContainer = document.getElementById('authorResult');
+            resultContainer.innerHTML = '';
+            
+            if (!author) {
+                resultContainer.innerHTML = '<p class="text-red-500">Please enter an author name</p>';
+                return;
+            }
+            
+            const books = mockDatabase.books.filter(b => 
+                b.author.toLowerCase().includes(author)
+            );
+            
+            if (books.length > 0) {
+                books.forEach(book => {
+                    const bookCard = createBookCard(book);
+                    resultContainer.appendChild(bookCard);
+                });
+            } else {
+                resultContainer.innerHTML = `<p class="text-red-500">No books found by author: ${author}</p>`;
+            }
+        }
+
+        function searchByTitle() {
+            const title = document.getElementById('titleSearch').value.toLowerCase();
+            const resultContainer = document.getElementById('titleResult');
+            resultContainer.innerHTML = '';
+            
+            if (!title) {
+                resultContainer.innerHTML = '<p class="text-red-500">Please enter a title</p>';
+                return;
+            }
+            
+            const books = mockDatabase.books.filter(b => 
+                b.title.toLowerCase().includes(title)
+            );
+            
+            if (books.length > 0) {
+                books.forEach(book => {
+                    const bookCard = createBookCard(book);
+                    resultContainer.appendChild(bookCard);
+                });
+            } else {
+                resultContainer.innerHTML = `<p class="text-red-500">No books found with title: ${title}</p>`;
+            }
+        }
+
+        function getBookReviews() {
+            const bookId = document.getElementById('reviewBookId').value;
+            const reviewsContainer = document.getElementById('bookReviews');
+            reviewsContainer.innerHTML = '';
+            
+            if (!bookId) {
+                reviewsContainer.innerHTML = '<p class="text-red-500">Please enter a book ID</p>';
+                return;
+            }
+            
+            const book = mockDatabase.books.find(b => b.id === Number(bookId));
+            
+            if (!book) {
+                reviewsContainer.innerHTML = `<p class="text-red-500">No book found with ID: ${bookId}</p>`;
+                return;
+            }
+            
+            const reviews = mockDatabase.reviews.filter(r => r.bookId === Number(bookId));
+            
+            if (reviews.length > 0) {
+                const reviewList = document.createElement('div');
+                reviewList.className = 'space-y-4';
+                
+                reviews.forEach(review => {
+                    const reviewElement = document.createElement('div');
+                    reviewElement.className = 'bg-gray-50 p-4 rounded-lg';
+                    reviewElement.innerHTML = `
+                        <div class="flex justify-between">
+                            <h3 class="font-semibold">${review.username}</h3>
+                            <div>${'★'.repeat(review.rating)}</div>
+                        </div>
+                        <p class="mt-2">${review.content}</p>
+                        <div class="text-sm text-gray-500 mt-2">${review.date}</div>
+                        ${currentUser && currentUser.username === review.username ? 
+                            `<button onclick="deleteReviewPrompt('${review.id}')" class="mt-2 text-sm text-red-500">Delete</button>` : ''}
+                    `;
+                    reviewList.appendChild(reviewElement);
+                });
+                
+                reviewsContainer.appendChild(reviewList);
+            } else {
+                reviewsContainer.innerHTML = `<p class="text-gray-500">No reviews yet for ${book.title}</p>`;
+            }
+        }
+
+        function submitReview() {
+            if (!currentUser) {
+                document.getElementById('reviewStatus').textContent = 'Please login first';
+                document.getElementById('reviewStatus').className = 'text-red-500 mt-3';
+                showLoginModal();
+                return;
+            }
+            
+            const bookId = document.getElementById('reviewBookIdUser').value;
+            const content = document.getElementById('reviewContent').value;
+            const rating = document.getElementById('reviewRating').value;
+            
+            if (!bookId || !content || !rating) {
+                document.getElementById('reviewStatus').textContent = 'Please fill in all fields';
+                document.getElementById('reviewStatus').className = 'text-red-500 mt-3';
+                return;
+            }
+            
+            const book = mockDatabase.books.find(b => b.id === Number(bookId));
+            
+            if (!book) {
+                document.getElementById('reviewStatus').textContent = 'Invalid Book ID';
+                document.getElementById('reviewStatus').className = 'text-red-500 mt-3';
+                return;
+            }
+            
+            // Check if user already reviewed this book
+            const existingReviewIndex = mockDatabase.reviews.findIndex(
+                r => r.bookId === Number(bookId) && r.username === currentUser.username
+            );
+            
+            if (existingReviewIndex >= 0) {
+                // Update existing review
+                mockDatabase.reviews[existingReviewIndex] = {
+                    ...mockDatabase.reviews[existingReviewIndex],
+                    content,
+                    rating: Number(rating),
+                    date: new Date().toISOString()
+                };
+            } else {
+                // Add new review
+                mockDatabase.reviews.push({
+                    id: mockDatabase.reviews.length + 1,
+                    bookId: Number(bookId),
+                    username: currentUser.username,
+                    content,
+                    rating: Number(rating),
+                    date: new Date().toISOString()
+                });
+            }
+            
+            document.getElementById('reviewStatus').textContent = 'Review submitted successfully!';
+            // Auto-refresh reviews
+            if (document.getElementById('reviewBookId').value === bookId) {
+                getBookReviews();
+            }
+            document.getElementById('reviewStatus').className = 'text-green-500 mt-3';
+            
+            // Clear form
+            document.getElementById('reviewBookIdUser').value = '';
+            document.getElementById('reviewContent').value = '';
+        }
+
+        function deleteReview() {
+            const reviewId = document.getElementById('deleteReviewId').value;
+            
+            if (!reviewId) {
+                document.getElementById('deleteStatus').textContent = 'Please enter a Review ID';
+                document.getElementById('deleteStatus').className = 'text-red-500 mt-3';
+                return;
+            }
+            
+            if (!currentUser) {
+                document.getElementById('deleteStatus').textContent = 'Please login first';
+                document.getElementById('deleteStatus').className = 'text-red-500 mt-3';
+                return;
+            }
+            
+            const reviewIndex = mockDatabase.reviews.findIndex(
+                r => r.id === Number(reviewId) && r.username === currentUser.username
+            );
+            
+            if (reviewIndex >= 0) {
+                mockDatabase.reviews.splice(reviewIndex, 1);
+                document.getElementById('deleteStatus').textContent = 'Review deleted successfully!';
+                document.getElementById('deleteStatus').className = 'text-green-500 mt-3';
+                document.getElementById('deleteReviewId').value = '';
+            } else {
+                document.getElementById('deleteStatus').textContent = 'Review not found or you are not authorized';
+                document.getElementById('deleteStatus').className = 'text-red-500 mt-3';
+            }
+        }
+
+        function deleteReviewPrompt(reviewId) {
+            if (confirm('Are you sure you want to delete this review?')) {
+                document.getElementById('deleteReviewId').value = reviewId;
+                deleteReview();
+                getBookReviews(); // Refresh the reviews list
+            }
+        }
+
+        // Helper function to create book cards
+        function createBookCard(book) {
+            const card = document.createElement('div');
+            card.className = 'book-card bg-white rounded-lg shadow-md overflow-hidden';
+            card.innerHTML = `
+                <img src="${book.image}" alt="${book.title} by ${book.author}" class="w-full h-48 object-cover">
+                <div class="p-4">
+                    <h3 class="font-bold text-lg mb-1">${book.title}</h3>
+                    <p class="text-gray-600 mb-2">by ${book.author}</p>
+                    <div class="flex justify-between text-sm text-gray-500 mb-3">
+                        <span>${book.year}</span>
+                        <span>${book.genre}</span>
+                    </div>
+                    <p class="text-sm text-gray-700 mb-3">${book.description}</p>
+                    <div class="flex justify-between items-center">
+                        <span class="text-sm font-semibold">ISBN: ${book.isbn}</span>
+                        <button onclick="getBookReviewsPrompt(${book.id})" class="text-blue-500 text-sm">Reviews</button>
+                    </div>
+                </div>
+            `;
+            return card;
+        }
+
+        function getBookReviewsPrompt(bookId) {
+            document.getElementById('reviewBookId').value = bookId;
+            getBookReviews();
+            // Scroll to review section
+            document.getElementById('bookReviews').scrollIntoView({ behavior: 'smooth' });
+        }
+
+        // Initialize with some mock data
+        function initializeMockData() {
+            // Add default users
+            mockDatabase.users.push({
+                id: 1,
+                username: 'admin',
+                password: 'admin123',
+                email: 'admin@bookshop.com',
+                dateJoined: new Date().toISOString()
+            });
+            
+            // Add default reviews
+            mockDatabase.reviews.push({
+                id: 1,
+                bookId: 1,
+                username: 'admin',
+                content: 'A classic masterpiece that captures the essence of the American Dream.',
+                rating: 5,
+                date: new Date('2023-01-15').toISOString()
+            });
+            
+            mockDatabase.reviews.push({
+                id: 2,
+                bookId: 2,
+                username: 'admin',
+                content: 'Powerful story about racial injustice and moral growth.',
+                rating: 5,
+                date: new Date('2023-02-20').toISOString()
+            });
+            
+            mockDatabase.reviews.push({
+                id: 3,
+                bookId: 3,
+                username: 'admin',
+                content: 'A disturbing vision of a totalitarian future.',
+                rating: 4,
+                date: new Date('2023-03-10').toISOString()
+            });
+        }
+
+        // Initialize
+        initializeMockData();
+    </script>
+<!-- Footer -->
+    <footer class="gradient-bg text-white py-4 mt-8">
+        <div class="container mx-auto px-4 text-center">
+            <p>GitHub Repository: <a href="https://github.com/yourusername/bookshop-management" class="underline" target="_blank">Book Shop Management System</a></p>
+            <p class="text-sm mt-2">© 2023 BookVerse. All rights reserved.</p>
+        </div>
+    </footer>
+</body>
+</html>
